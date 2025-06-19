@@ -7,7 +7,7 @@ from elevenlabs.client import ElevenLabs
 load_dotenv()
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-DEFAULT_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "TxGEqnHWrfWFTfGW9XjX")  # Voix féminine douce par défaut
+DEFAULT_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "tMyQcCxfGDdIt7wJ2RQw")  # Voix féminine douce par défaut
 AUDIO_DIR = os.path.join(os.path.dirname(__file__), "audio")
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
@@ -33,6 +33,8 @@ def generate_audio(story_text, filename="output_audio.mp3"):
             f.write(chunk)
 
     return output_path
+
+    
 
 # Exemple d'utilisation
 if __name__ == "__main__":
