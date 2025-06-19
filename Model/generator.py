@@ -10,35 +10,46 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 tokenizer.pad_token = tokenizer.eos_token
 model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
 
-def build_prompt(name=None, creature=None, place=None):
-    name = name or "Lina"
-    creature = creature or "little owl"
-    place = place or "enchanted forest"
+def build_prompt(name="Lina", creature="little owl", place="enchanted forest", theme="animals"):
     return (
-        f"Theme: animals\n"
-        f"Story: This is a short and cheerful story for kids.\n"
-        f"{name} is a {creature} who lives in a {place}. One day, something unusual happens..."
+        f"This is a short bedtime story for children aged 6 to 10.\n"
+        f"Theme: {theme}\n"
+        f"{name} is a {creature} who lives in a {place}. One day,"
     )
+def clean_story(text, prompt):
+    story = text.replace(prompt, "").strip()
+    # Couper à la première apparition d’un saut de contexte
+    for stop in ["Theme:", "Book", "Characters:", "Table of Contents"]:
+        if stop in story:
+            story = story.split(stop)[0].strip()
+    return story
 
-def generate_story(prompt, max_length=450, temperature=0.9, top_p=0.9):
+
+def is_story_valid(story, min_words=50):
+    return len(story.split()) >= min_words
+
+def generate_story(prompt, max_length=450, temperature=0.9, top_p=0.9, max_tries=3):
     encoded = tokenizer(prompt, return_tensors="pt", padding=True)
     input_ids = encoded["input_ids"]
-    attention_mask = encoded["attention_mask"]  # ✅ déclaration ici
+    attention_mask = encoded["attention_mask"]
 
-    output = model.generate(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        max_length=max_length,
-        temperature=temperature,
-        top_p=top_p,
-        repetition_penalty=1.2,
-        do_sample=True,
-        pad_token_id=tokenizer.eos_token_id
-    )
+    for _ in range(max_tries):
+        output = model.generate(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            max_length=max_length,
+            temperature=temperature,
+            top_p=top_p,
+            repetition_penalty=1.2,
+            do_sample=True,
+            pad_token_id=tokenizer.eos_token_id
+        )
+        story = tokenizer.decode(output[0], skip_special_tokens=True)
+        story = clean_story(story, prompt)
+        if is_story_valid(story):
+            return story
 
-    story = tokenizer.decode(output[0], skip_special_tokens=True)
-    return story.replace(prompt, "", 1).strip()
-
+    return "Sorry, the story could not be generated correctly after several attempts."
 
 def generate_story_with_audio(prompt, audio_enabled=False):
     story = generate_story(prompt)
@@ -51,8 +62,8 @@ def generate_story_with_audio(prompt, audio_enabled=False):
 # Exemple d'utilisation
 if __name__ == "__main__":
     prompt = build_prompt(name="Tilo", creature="baby dragon", place="mountain village")
-    story, audio = generate_story_with_audio(prompt, audio_enabled=True)
+    story = generate_story(prompt)
     print("\nGenerated story:\n")
     print(story)
-    if audio:
-        print(f"\nAudio saved at: {audio}")
+    # if audio:
+    #     print(f"\nAudio saved at: {audio}")
