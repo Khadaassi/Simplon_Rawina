@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RAWINA{% endblock %}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap">
+    <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- Navigation -->
+<nav class="bg-fairy text-gray-700 py-10 mt-12 border-t border-glow">
+    <div class="container mx-auto px-4 text-center text-sm">
+        <!-- Logo & Brand -->
+        <a href="{% url 'user:home' %}" class="flex items-center space-x-2 text-deepviolet">
+            {% comment %} <img src="{% static 'images/book_icon.svg' %}" alt="RAWINA logo" class="w-8 h-8"> {% endcomment %}
+            <span class="text-2xl font-bold tracking-wide">RAWINA</span>
+        </a>
+
+        <!-- Menu -->
+        <ul class="nav-menu">
+            <li>
+                <a href="{% url 'user:login' %}" class="hover:text-deepviolet transition-colors duration-200">
+                    Login
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'user:register' %}" class="hover:text-deepviolet transition-colors duration-200">
+                    Register
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+    <!-- Contenu principal -->
+    <main class="container mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+        <!-- Footer -->
+    <footer class="bg-fairy text-gray-700 py-10 mt-12 border-t border-glow">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>© 2025 RAWINA — Crafted with imagination.</p>
+            <p>RAWINA, Inc. – Registered in Delaware</p>
+            <p>All rights reserved.</p>
+        </div>
+    </footer>
+    
+
+</body>
+</html>

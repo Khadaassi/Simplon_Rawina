@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}RAWINA{% endblock %}</title>
+        <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
+    </head>
+    <body class="bg-white text-gray-900">
+
+        <!-- Navigation -->
+        <nav class="bg-navy text-white p-4 shadow-md">
+            <div class="container mx-auto flex justify-between items-center">
+                <a class="text-xl font-bold">RAWINA</a>
+                <ul class="flex space-x-4">
+                    <form action="{% url 'user:login' %}" method="post">
+                        {% csrf_token %}
+                        <button type='submit'class="hover:text-[#00bfae] transition duration-300">Logout</button>
+                    </form>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="container mx-auto p-6">
+            {% block content %}{% endblock %}
+        </main>
+
+    <!-- Footer -->
+        <footer class="bg-navy text-white py-10">
+            <div class="container mx-auto px-6 lg:px-20 mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-400 text-sm">
+                <!-- Legal Information -->
+                <div class="md:col-span-2">
+                    <p>© 2025 RAWINA</p>
+                    <p>RAWINA, Inc. – Registered in Delaware</p>
+                    <p>All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+    </body>
+</html>

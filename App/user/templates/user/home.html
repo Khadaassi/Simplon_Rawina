@@ -1,0 +1,51 @@
+{% extends "theme/base.html" %}
+{% load static %}
+
+{% block title %}Welcome to RAWINA{% endblock %}
+
+{% block content %}
+<section class="relative bg-paleblue">
+    <!-- Hero Section -->
+    <div class="container mx-auto flex flex-col md:flex-row items-center justify-between py-20 px-6 md:px-12">
+        <!-- Left Text Section -->
+        <div class="md:w-1/2 text-center md:text-left space-y-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-navy leading-tight">
+                Create Magical Stories with RAWINA
+            </h1>
+            <p class="text-gray-700 text-lg">
+                RAWINA helps you generate unique and imaginative tales for children aged 3–6. Let creativity guide the adventure!
+            </p>
+        </div>
+
+        {% comment %} <!-- Right Image Section -->
+        <div class="md:w-1/2 flex justify-center mt-10 md:mt-0">
+            <img src="{% static 'images/story_hero.jpg' %}" alt="Story illustration" class="w-full max-w-lg mx-auto rounded-lg shadow-md">
+        </div>
+    </div> {% endcomment %}
+</section>
+
+<!-- Features Section -->
+<section class="container mx-auto py-16 px-6">
+    <h2 class="text-3xl font-bold text-center text-navy">Why Choose RAWINA?</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+        <div class="p-6 bg-white rounded-lg shadow-md text-center hover:shadow-lg transition duration-300">
+            <h3 class="text-xl font-semibold text-deepblue">Tailored Stories</h3>
+            <p class="text-gray-600 mt-2">Choose characters, themes, and settings to personalize each tale.</p>
+        </div>
+        <div class="p-6 bg-white rounded-lg shadow-md text-center hover:shadow-lg transition duration-300">
+            <h3 class="text-xl font-semibold text-deepblue">Beautiful Narration</h3>
+            <p class="text-gray-600 mt-2">Enjoy audio narration that brings each story to life.</p>
+        </div>
+        <div class="p-6 bg-white rounded-lg shadow-md text-center hover:shadow-lg transition duration-300">
+            <h3 class="text-xl font-semibold text-deepblue">Magical Illustrations</h3>
+            <p class="text-gray-600 mt-2">Add vivid images to spark imagination and wonder.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-navy text-white py-12 text-center">
+    <h2 class="text-2xl font-bold">Start Your Storytelling Journey</h2>
+    <p class="mt-2 text-lightblue">Join RAWINA and turn ideas into unforgettable adventures.</p>
+</section>
+{% endblock %}
