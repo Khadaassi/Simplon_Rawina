@@ -5,16 +5,18 @@ from datetime import datetime
 from audio_generator import generate_audio
 
 # Chargement du modèle fine-tuné en anglais
-MODEL_PATH = "gpt2-large"
+MODEL_PATH = "gpt2-xl"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 tokenizer.pad_token = tokenizer.eos_token
 model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
 
-def build_prompt(name="Lina", creature="little owl", place="enchanted forest", theme="animals"):
+def build_prompt(name="Lina", creature="little owl", place="enchanted forest", theme="Fantasy"):
     return (
-        f"This is a short bedtime story for children aged 6 to 10.\n"
+        f"This is a short bedtime story for children aged 3 to 6.\n"
         f"Theme: {theme}\n"
-        f"{name} is a {creature} who lives in a {place}. One day,"
+        f"Starts with a character {name}, a creature type {creature}, and a place {place}.\n"
+        "Ends with a moral lesson.\n"
+        # f"{name} is a {creature} who lives in a {place}. One day,"
     )
 def clean_story(text, prompt):
     story = text.replace(prompt, "").strip()
@@ -61,7 +63,7 @@ def generate_story_with_audio(prompt, audio_enabled=False):
 
 # Exemple d'utilisation
 if __name__ == "__main__":
-    prompt = build_prompt(name="Tilo", creature="baby dragon", place="mountain village")
+    prompt = build_prompt(name="Tilo", creature="Duck", place="farm", theme="adventure")
     story = generate_story(prompt)
     print("\nGenerated story:\n")
     print(story)
