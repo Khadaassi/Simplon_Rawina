@@ -1,3 +1,4 @@
+{% extends "theme/base_login.html" %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -9,17 +10,11 @@
 </head>
 
 {% block content %}
-<nav class="bg-navy text-white p-4 shadow-md">
-    <div class="container mx-auto flex justify-between items-center">
-        <a href="{% url 'user:home' %}" class="text-xl font-bold">RAWINA</a>
-    </div>
-</nav>
 <div class="bg-gray-200 min-h-screen flex items-center justify-center px-4">
     <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-xl space-y-6">
-        <h2 class="text-2xl font-bold text-deepblue text-center">
-            Login to Your Account
-        </h2>    
-
+        <h2 class="text-2xl font-bold text-deepviolet text-center">
+            Login to your Account
+        </h2>   
         <form method="post" class="space-y-4">
             {% csrf_token %}
 
@@ -33,13 +28,13 @@
                 <input type="password" name="password" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-skyblue focus:outline-none">
             </div>
 
-            <button type="submit" class="w-full mt-4 bg-deepblue text-white py-2 rounded-lg hover:bg-skyblue transition">
+            <button type="submit" class="w-full mt-4 bg-paleblue text-paleviolet py-2 rounded-lg hover:bg-fairy transition">
                 Login
             </button>
         </form>
         <div class="text-center text-sm text-gray-600">
             Don't have an account yet?
-            <a href="{% url 'user:register' %}" class="text-deepblue hover:underline">Sign Up</a>
+            <a href="{% url 'user:register' %}" class="text-deepviolet hover:bg-fairy">Sign Up</a>
         </div>
     </div>
 </div>
