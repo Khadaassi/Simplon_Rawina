@@ -5,7 +5,8 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView, FormView
 from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView
 from django.urls import reverse_lazy
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
+from django.contrib import messages
 from .forms import RegistrationForm
 
 # Create your views here.
@@ -49,7 +50,10 @@ class EditProfileView(TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # Handle profile update logic here
+        user = request.user
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        user.save()
         return redirect('user:account_settings')
 
 class ChangePasswordView(TemplateView):
@@ -61,6 +65,27 @@ class ChangePasswordView(TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # Handle password change logic here
+        user = request.user
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not user.check_password(current_password):
+            messages.error(request, "Current password is incorrect.")
+            return redirect('user:change_password')
+
+        if new_password != confirm_password:
+            messages.error(request, "New passwords do not match.")
+            return redirect('user:change_password')
+
+        if len(new_password) < 8:
+            messages.error(request, "New password must be at least 8 characters.")
+            return redirect('user:change_password')
+
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)  # Important pour ne pas déconnecter l'utilisateur
+
+        messages.success(request, "Your password has been changed successfully.")
         return redirect('user:account_settings')
     

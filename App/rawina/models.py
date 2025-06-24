@@ -1,13 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Story(models.Model):
     THEME_CHOICES = [
-        ('animals', 'Animaux'),
-        ('fantasy', 'Fantastique'),
-        ('daly_hero', 'Petit héros du quotidien'),
+        ('animals', 'Animals'),
+        ('fantasy', 'Fantasy'),
+        ('daily_hero', 'Daily Hero'),
     ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stories')
     title = models.CharField(max_length=100, help_text="Titre de l’histoire")
     theme = models.CharField(max_length=20, choices=THEME_CHOICES)
@@ -21,4 +21,3 @@ class Story(models.Model):
 
     def __str__(self):
         return f"{self.title} – {self.user.username} ({self.created_at.date()})"
-    

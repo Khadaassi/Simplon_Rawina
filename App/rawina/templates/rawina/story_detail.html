@@ -1,0 +1,45 @@
+{% extends "theme/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}{{ story.title }} - RAWINA{% endblock %}
+
+{% block content %}
+<div class="bg-sand-beige min-h-screen px-6 py-12 flex items-start justify-center">
+  <div class="max-w-3xl w-full bg-white shadow-xl rounded-xl p-8 border border-sage-green space-y-6">
+    
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-deepviolet mb-2">{{ story.title }}</h1>
+      <p class="text-sm text-sage-green font-medium">
+        Theme: {{ story.get_theme_display }} • Created on {{ story.created_at|date:"F j, Y" }}
+      </p>
+    </div>
+
+    <div class="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+      <p>{{ story.generated_text|linebreaks }}</p>
+    </div>
+
+    {% if story.audio_url %}
+    <div class="mt-6 text-center">
+      <audio controls class="w-full max-w-md mx-auto">
+        <source src="{{ story.audio_url }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+    </div>
+    {% endif %}
+
+    {% if story.images %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
+      {% for img_url in story.images %}
+        <img src="{{ img_url }}" alt="Story Illustration" class="w-full h-auto rounded-lg shadow">
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="text-center text-sm text-gray-600">
+      <a href="{% url 'rawina:dashboard' %}" class="text-softbrown hover:underline">
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -10,49 +10,39 @@
     <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
 </head>
 <body class="bg-white text-gray-900">
-
-<!-- Navigation -->
-<nav class="bg-fairy text-gray-700 py-10 mt-12 border-t border-glow">
-    <div class="container mx-auto px-4 text-center text-sm">
-        <!-- Logo & Brand -->
-        <a href="{% url 'user:home' %}" class="flex items-center space-x-2 text-deepviolet">
-            {% comment %} <img src="{% static 'images/book_icon.svg' %}" alt="RAWINA logo" class="w-8 h-8"> {% endcomment %}
-            <span class="text-2xl font-bold tracking-wide">RAWINA</span>
-        </a>
-
-        <!-- Menu -->
-        <ul class="nav-menu">
+    <!-- Navigation -->
+    <nav class="bg-sand-beige text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Logo & Brand -->
+            <a href="{% url 'user:home' %}" class="flex items-center space-x-2 text-sage-green">
+                {% comment %} <img src="{% static 'images/book_icon.svg' %}" alt="RAWINA logo" class="w-8 h-8"> {% endcomment %}
+                <span class="text-2xl font-bold tracking-wide">RAWINA</span>
+            </a>
+            <ul class="flex space-x-4">
                 <li>
-                    <a href="{% url 'user:login' %}" class="hover:text-sage-green transition-colors duration-200">
+                    <a href="{% url 'user:login' %}" class="text-sage-green hover:text-light-sienna transition-colors duration-200 flex px-4 py-2">
                         Login
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'user:register' %}" class="hover:text-sage-green transition-colors duration-200">
+                    <a href="{% url 'user:register' %}" class="text-sage-green hover:text-light-sienna transition-colors duration-200 flex px-4 py-2">
                         Sign Up
                     </a>
                 </li>
-
-        </ul>
-    </div>
-</nav>
-
-
+            </ul>
+        </div>
+    </nav>
     <!-- Contenu principal -->
     <main class="container mx-auto px-4 py-6">
         {% block content %}{% endblock %}
     </main>
-
         <!-- Footer -->
-    <footer class="bg-fairy text-gray-700 py-10 mt-12 border-t border-glow">
+    <footer class="bg-sand-beige text-gray-700 py-10 mt-12 border-t border-glow">
         <div class="container mx-auto px-4 text-center text-sm">
             <p>© 2025 RAWINA — Crafted with imagination.</p>
             <p>RAWINA, Inc. – Registered in Delaware</p>
             <p>All rights reserved.</p>
         </div>
     </footer>
-    
-
 </body>
 </html>
-
