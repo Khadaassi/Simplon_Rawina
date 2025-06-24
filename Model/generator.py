@@ -10,27 +10,95 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 tokenizer.pad_token = tokenizer.eos_token
 model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
 
+# def build_prompt(name="Lina", creature="little owl", place="enchanted forest", theme="Fantasy"):
+#     return (
+#         f"This is a short bedtime story for children aged 3 to 6.\n"
+#         f"Theme: {theme}\n"
+#         f"Starts with a character {name}, a creature type {creature}, and a place {place}.\n"
+#         "Ends with a moral lesson.\n"
+#         # f"{name} is a {creature} who lives in a {place}. One day,"
+#     )
+
+
+# def clean_story(text, prompt):
+#     story = text.replace(prompt, "").strip()
+#     # Couper à la première apparition d’un saut de contexte
+#     for stop in ["Theme:", "Book", "Characters:", "Table of Contents"]:
+#         if stop in story:
+#             story = story.split(stop)[0].strip()
+#     return story
+
+
+# def is_story_valid(story, min_words=50):
+#     return len(story.split()) >= min_words
+
+# def generate_story(prompt, max_length=600, temperature=0.9, top_p=0.9, max_tries=3):
+#     encoded = tokenizer(prompt, return_tensors="pt", padding=True)
+#     input_ids = encoded["input_ids"]
+#     attention_mask = encoded["attention_mask"]
+
+#     for _ in range(max_tries):
+#         output = model.generate(
+#             input_ids=input_ids,
+#             attention_mask=attention_mask,
+#             max_length=max_length,
+#             temperature=temperature,
+#             top_p=top_p,
+#             repetition_penalty=1.2,
+#             do_sample=True,
+#             pad_token_id=tokenizer.eos_token_id
+#         )
+#         story = tokenizer.decode(output[0], skip_special_tokens=True)
+#         story = clean_story(story, prompt)
+#         if is_story_valid(story):
+#             return story
+
+#     return "Sorry, the story could not be generated correctly after several attempts."
+
+# def generate_story_with_audio(prompt, audio_enabled=False):
+#     story = generate_story(prompt)
+#     audio_path = None
+#     if audio_enabled:
+#         safe_filename = f"story_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3"
+#         audio_path = generate_audio(story, filename=safe_filename)
+#     return story, audio_path
+
+# # Exemple d'utilisation
+# if __name__ == "__main__":
+#     prompt = build_prompt(name="Tilo", creature="Duck", place="farm", theme="adventure")
+#     story = generate_story(prompt)
+#     print("\nGenerated story:\n")
+#     print(story)
+#     # if audio:
+#     #     print(f"\nAudio saved at: {audio}")
+
+
 def build_prompt(name="Lina", creature="little owl", place="enchanted forest", theme="Fantasy"):
     return (
-        f"This is a short bedtime story for children aged 3 to 6.\n"
-        f"Theme: {theme}\n"
-        f"Starts with a character {name}, a creature type {creature}, and a place {place}.\n"
-        "Ends with a moral lesson.\n"
-        # f"{name} is a {creature} who lives in a {place}. One day,"
+        "This is a short bedtime story for children aged 6 to 10.\n"
+        f"Theme: {theme}\n\n"
+        "Example:\n"
+        "Once upon a time, in a magical forest, lived a little fox named Nilo. He loved exploring the woods and making new friends. One day, he found a strange glowing mushroom. Curious and brave, he followed its light deep into the forest.\n"
+        "With the help of his friend Luna the owl, Nilo discovered a hidden garden that only opened to kind-hearted animals. From that day, Nilo knew that kindness and curiosity open many doors.\n\n"
+        "Now here's another story:\n"
+        f"{name} is a {creature} who lives in a {place}. One day,"
     )
+
 def clean_story(text, prompt):
     story = text.replace(prompt, "").strip()
-    # Couper à la première apparition d’un saut de contexte
-    for stop in ["Theme:", "Book", "Characters:", "Table of Contents"]:
+    # Nettoyage plus intelligent : couper à des mots signaux
+    stopwords = ["Theme:", "Example:", "Table of Contents", "Book", "Chapter"]
+    for stop in stopwords:
         if stop in story:
             story = story.split(stop)[0].strip()
+    # Supprimer doublons éventuels du prompt
+    story = story.replace(prompt.strip(), "").strip()
     return story
 
+def is_story_valid(story, min_words=60):
+    return len(story.split()) >= min_words and "." in story
 
-def is_story_valid(story, min_words=50):
-    return len(story.split()) >= min_words
-
-def generate_story(prompt, max_length=450, temperature=0.9, top_p=0.9, max_tries=3):
+def generate_story(prompt, max_length=600, temperature=0.85, top_p=0.95, max_tries=3):
     encoded = tokenizer(prompt, return_tensors="pt", padding=True)
     input_ids = encoded["input_ids"]
     attention_mask = encoded["attention_mask"]
@@ -44,7 +112,8 @@ def generate_story(prompt, max_length=450, temperature=0.9, top_p=0.9, max_tries
             top_p=top_p,
             repetition_penalty=1.2,
             do_sample=True,
-            pad_token_id=tokenizer.eos_token_id
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
         )
         story = tokenizer.decode(output[0], skip_special_tokens=True)
         story = clean_story(story, prompt)
@@ -57,15 +126,13 @@ def generate_story_with_audio(prompt, audio_enabled=False):
     story = generate_story(prompt)
     audio_path = None
     if audio_enabled:
-        safe_filename = f"story_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3"
-        audio_path = generate_audio(story, filename=safe_filename)
+        filename = f"story_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3"
+        audio_path = generate_audio(story, filename=filename)
     return story, audio_path
 
-# Exemple d'utilisation
+# Exemple de test
 if __name__ == "__main__":
-    prompt = build_prompt(name="Tilo", creature="Duck", place="farm", theme="adventure")
-    story = generate_story(prompt)
+    prompt = build_prompt(name="Tilo", creature="duck", place="colorful farm", theme="adventure")
+    story, _ = generate_story_with_audio(prompt, audio_enabled=False)
     print("\nGenerated story:\n")
     print(story)
-    # if audio:
-    #     print(f"\nAudio saved at: {audio}")
