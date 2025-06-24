@@ -19,21 +19,20 @@
             {% comment %} <img src="{% static 'images/book_icon.svg' %}" alt="RAWINA logo" class="w-8 h-8"> {% endcomment %}
             <span class="text-2xl font-bold tracking-wide">RAWINA</span>
         </a>
-
-        <!-- Menu -->
-        <ul class="nav-menu">
-                <li>
-                    <a href="{% url 'user:login' %}" class="hover:text-sage-green transition-colors duration-200">
-                        Login
+    <!-- Navigation -->
+            <nav class="bg-sand-beige text-white p-4 shadow-md">
+                <div class="container mx-auto flex justify-between items-center">
+                    <a class="text-xl font-bold">RAWINA</a>
+                        <ul class="flex space-x-4">
+                            <form action="{% url 'user:login' %}" method="post">
+                                {% csrf_token %}
+                                <button type='submit'class="hover:text-[#00bfae] transition duration-300">Logout</button>
+                            </form>
+                        </ul>
                     </a>
-                </li>
-                <li>
-                    <a href="{% url 'user:register' %}" class="hover:text-sage-green transition-colors duration-200">
-                        Sign Up
-                    </a>
-                </li>
+                </div>
+            </nav>
 
-        </ul>
     </div>
 </nav>
 
@@ -55,4 +54,5 @@
 
 </body>
 </html>
+
 

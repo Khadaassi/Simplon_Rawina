@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, FormView
-from django.contrib.auth.views import LoginView as AuthLoginView
+from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView
 from django.urls import reverse_lazy
 from django.contrib.auth import login
 from .forms import RegistrationForm
@@ -29,6 +29,9 @@ class LoginView(AuthLoginView):
     def get_success_url(self):
         return reverse_lazy('rawina:dashboard')
 
+class LogoutView(LogoutView):
+    next_page = reverse_lazy('user:home')
+    
 class AccountSettingsView(TemplateView):
     template_name = 'user/account.html'
 
@@ -60,3 +63,4 @@ class ChangePasswordView(TemplateView):
     def post(self, request, *args, **kwargs):
         # Handle password change logic here
         return redirect('user:account_settings')
+    
