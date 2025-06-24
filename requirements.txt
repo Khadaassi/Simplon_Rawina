@@ -7,4 +7,3 @@ django-tailwind==4.0.1
 django-browser-reload==1.18.0
 # Requirements for the API
 
-# 
