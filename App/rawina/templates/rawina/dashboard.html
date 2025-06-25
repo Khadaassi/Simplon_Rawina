@@ -32,9 +32,12 @@
         </ul>
     </aside>
     <div class="w-full max-w-3xl space-y-6 border-4 border-sage-green rounded-lg shadow-2xl p-8 text-center bg-sage-green backdrop-blur-sm">
-        <h2 class="text-2xl font-bold text-sand-beige text-center">
-            Welcome to Your Dashboard, {{ user.username }}!
-        </h2>
+        <div class="flex justify-center mb-4">
+            <img src="{% static 'images/rawi3.png' %}" alt="RAWI" class="w-8 h-8">
+            <h2 class="text-2xl font-bold text-sand-beige text-center">
+                Welcome to Your Dashboard, {{ user.username }}!
+            </h2>
+        </div>
         <p class="text-gray-600 text-center">
             Here you can manage your stories and account settings.
         </p>
