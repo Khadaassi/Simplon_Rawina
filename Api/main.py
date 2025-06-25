@@ -4,10 +4,9 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel
 import torch
 from datetime import datetime
 from pathlib import Path
-
 # === Gestion de l'audio optionnelle ===
 try:
-    from audio_generator import generate_audio
+    from Model.audio_generator import generate_audio
 except ImportError:
     generate_audio = None
 
