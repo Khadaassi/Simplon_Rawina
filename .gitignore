@@ -194,3 +194,4 @@ cython_debug/
 .cursorindexingignore
 todo.txt 
 Model/audio/
+Model/gpt2*
