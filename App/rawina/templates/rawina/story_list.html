@@ -4,24 +4,47 @@
 {% block title %}Your Stories - RAWINA{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-sand-beige px-4 py-12 flex justify-center">
-    <div class="w-full max-w-4xl p-8 bg-powder-blue/30 rounded-lg shadow-xl border-4 border-sage-green">
-        <h2 class="text-3xl font-bold text-light-sienna mb-6 text-center">Your Stories</h2>
+<div 
+  class="min-h-screen bg-sand-beige flex items-center justify-center px-6 py-16 shadow-lg border-y-4 border-sage-green bg-cover bg-center"
+  style="background-image: url('{% static 'images/forest_bg.png' %}')"> 
+  
+  
+  <div class="absolute inset-0 bg-black/40"></div>
+    <div class="w-full max-w-4xl  border-4 border-sand-beige rounded-lg shadow-2xl p-8 bg-sage-green backdrop-blur-sm">
+        <h2 class="text-3xl font-bold text-sand-beige mb-8 text-center">Your Stories</h2>
+        
         {% if stories %}
-            <ul class="divide-y divide-sage-green">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for story in stories %}
-                    <li class="py-4">
-                        <a href="{% url 'rawina:story' story.id %}" class="text-deepviolet text-lg font-semibold hover:underline">
-                            {{ story.title }}
-                        </a>
-                        <p class="text-sm text-gray-600">Created on {{ story.created_at|date:"F j, Y" }}</p>
-                        <p class="text-sm italic text-softbrown">Theme: {{ story.theme|capfirst }}</p>
-                    </li>
+                    <div class="bg-sand-beige rounded-xl shadow-md border border-deepviolet p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-deepviolet">{{ story.title }}</h3>
+                            <p class="text-sm text-gray-700 mt-1">Created on {{ story.created_at|date:"F j, Y" }}</p>
+                            <p class="text-sm italic text-light-sienna mt-2">Theme: {{ story.theme|capfirst }}</p>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <a href="{% url 'rawina:story' story.id %}" class="text-deepviolet font-semibold hover:underline">
+                                Read more →
+                            </a>
+                            <a href="{% url 'rawina:story_delete' story.id %}" class="text-deepviolet hover:underline text-sm">
+                                🗑 Delete
+                            </a>
+                        </div>
+                    </div>
                 {% endfor %}
-            </ul>
+            </div>
         {% else %}
-            <p class="text-center text-gray-600">You haven't created any stories yet. <a href="{% url 'rawina:choose_theme' %}" class="text-deepviolet hover:underline">Start here</a>.</p>
+            <p class="text-center text-sand-beige">You haven't created any stories yet.
+                <a href="{% url 'rawina:choose_theme' %}" class="text-white underline">Start here</a>.
+            </p>
         {% endif %}
+
+        <div class="text-center text-sm text-gray-600">
+      <a href="{% url 'rawina:dashboard' %}" class="text-softbrown hover:underline">
+        Back to Dashboard
+      </a>
+    </div>
     </div>
 </div>
+
 {% endblock %}

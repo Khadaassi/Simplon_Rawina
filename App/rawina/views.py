@@ -43,7 +43,7 @@ class StoryCreateView(FormView):
         theme = form.cleaned_data['theme']
 
         prompt = f"{name} wants to hear a story about {character} in {place} — a {theme} adventure."
-        generated_text = "Once upon a time..."
+        generated_text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor, orci non commodo tincidunt, sapien turpis euismod est, ut dapibus diam lorem ac eros. Mauris et fermentum urna. Integer eu sem eu erat posuere rhoncus. Aliquam erat volutpat. Cras congue, neque ac aliquam fermentum, tellus nulla sodales lorem, non efficitur lorem velit sed nisi. Nullam tincidunt, lacus at gravida tincidunt, elit risus rhoncus velit, nec egestas nisl dolor a nisi. Morbi hendrerit ut elit id gravida. Suspendisse."
 
         story = Story.objects.create(
             user=self.request.user,
@@ -74,3 +74,20 @@ class StoryDetailView(TemplateView):
         story_id = self.kwargs.get('pk')
         context['story'] = Story.objects.get(id=story_id)
         return context
+
+class StoryDeleteView(TemplateView):
+    template_name = 'rawina/story_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        story_id = self.kwargs.get('pk')
+        context['story'] = Story.objects.get(id=story_id)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        story_id = self.kwargs.get('pk')
+        story = Story.objects.get(id=story_id)
+        if story.user == request.user:
+            story.delete()
+            return redirect(reverse('rawina:story_list'))
+        return redirect(reverse('rawina:dashboard'))
