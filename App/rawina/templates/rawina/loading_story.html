@@ -1,0 +1,25 @@
+{% extends "theme/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Generating Story...{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-sand-beige flex flex-col items-center justify-center px-6 py-16">
+    <img src="{% static 'images/owl_loader.gif' %}" alt="Loading Owl" class="w-32 mb-6">
+    
+    <h2 class="text-2xl font-bold text-sage-green mb-2">Rawina is creating your story...</h2>
+    <p class="text-gray-700 text-center max-w-xl">Gathering words, mixing magic, and imagining the perfect tale just for you. This may take a few seconds.</p>
+
+    <div class="mt-8">
+        <svg class="animate-spin h-8 w-8 text-light-sienna" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+        </svg>
+    </div>
+</div>
+<script>
+    setTimeout(function () {
+        window.location.href = "{{ redirect_url }}";
+    }, {{ delay|default:300000 }});
+</script>
+{% endblock %}

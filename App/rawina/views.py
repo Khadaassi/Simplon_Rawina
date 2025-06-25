@@ -54,7 +54,10 @@ class StoryCreateView(FormView):
             generated_text=generated_text
         )
 
-        return redirect(reverse('rawina:story', kwargs={'pk': story.pk}))
+        return render(self.request, 'rawina/loading_story.html', {
+            'redirect_url': reverse('rawina:story', kwargs={'pk': story.pk}),
+            'delay': 3000 
+        })
 
 class ChooseThemeView(FormView):
     template_name = 'rawina/choose_theme.html'
