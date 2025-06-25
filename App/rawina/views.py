@@ -41,13 +41,14 @@ class StoryCreateView(FormView):
         character = form.cleaned_data['character']
         place = form.cleaned_data['place']
         theme = form.cleaned_data['theme']
+        title = f"{name.capitalize()}'s Story"
 
-        prompt = f"{name} wants to hear a story about {character} in {place} — a {theme} adventure."
+        prompt = f"Write a story about {name}, a {character} in {place} — a {theme} adventure."
         generated_text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce porttitor, orci non commodo tincidunt, sapien turpis euismod est, ut dapibus diam lorem ac eros. Mauris et fermentum urna. Integer eu sem eu erat posuere rhoncus. Aliquam erat volutpat. Cras congue, neque ac aliquam fermentum, tellus nulla sodales lorem, non efficitur lorem velit sed nisi. Nullam tincidunt, lacus at gravida tincidunt, elit risus rhoncus velit, nec egestas nisl dolor a nisi. Morbi hendrerit ut elit id gravida. Suspendisse."
 
         story = Story.objects.create(
             user=self.request.user,
-            title=f"{character}'s Story",
+            title=title,
             theme=theme,
             prompt=prompt,
             generated_text=generated_text
