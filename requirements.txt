@@ -20,8 +20,9 @@ requests==2.32.4
 fastapi==0.115.13
 uvicorn==0.34.3
 
-# --- API ElevenLabs (TTS) ---
+# --- API ElevenLabs/Openai (TTS) ---
 elevenlabs==2.3.0
+openai
 
 
 # --- Outils Dev ---

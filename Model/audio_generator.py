@@ -8,8 +8,9 @@ load_dotenv()
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 DEFAULT_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "tMyQcCxfGDdIt7wJ2RQw")  # Voix féminine douce par défaut
-AUDIO_DIR = os.path.join(os.path.dirname(__file__), "audio")
+AUDIO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../App/media/audio"))
 os.makedirs(AUDIO_DIR, exist_ok=True)
+
 
 client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
 
