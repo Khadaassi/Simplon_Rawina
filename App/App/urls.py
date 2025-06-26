@@ -19,6 +19,8 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include, reverse_lazy
 from django.views.generic import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,3 +29,5 @@ urlpatterns = [
     path('', RedirectView.as_view(url=reverse_lazy('user:home'))),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
