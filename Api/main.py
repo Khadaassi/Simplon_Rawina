@@ -76,8 +76,8 @@ def generate_story(prompt: str, max_length=400, temperature=0.8, top_p=0.95, max
         )
         story = tokenizer.decode(output[0], skip_special_tokens=True)
         story = clean_story(story, prompt)
-        if is_story_valid(story):
-            return story
+        # if is_story_valid(story):
+        return story
     return "Sorry, the story could not be generated correctly after several attempts."
 
 # === Endpoint test simple ===
