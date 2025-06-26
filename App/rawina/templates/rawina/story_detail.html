@@ -18,26 +18,28 @@
       </p>
     </div>
 
+    <div class="flex justify-center my-4">
+      {% if story.image %}
+        <img 
+          src="{{ story.image.url }}" 
+          alt="Image générée"
+          class="max-w-full md:max-w-md rounded-xl shadow-md"
+        >
+      {% endif %}
+    </div>
+
     <div class="prose prose-lg max-w-none text-gray-800 leading-relaxed">
       <p>{{ story.generated_text|linebreaks }}</p>
     </div>
 
-    {% if story.audio_url %}
-    <div class="mt-6 text-center">
-      <audio controls class="w-full max-w-md mx-auto">
-        <source src="{{ story.audio_url }}" type="audio/mpeg">
-        Your browser does not support the audio element.
-      </audio>
+    <div class="flex justify-center my-4">
+        {% if story.audio_file %}
+          <audio controls>
+            <source src="{{ story.audio_file.url }}" type="audio/mpeg">
+            Ton navigateur ne supporte pas l'audio.
+          </audio>
+        {% endif %}
     </div>
-    {% endif %}
-
-    {% if story.images %}
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
-      {% for img_url in story.images %}
-        <img src="{{ img_url }}" alt="Story Illustration" class="w-full h-auto rounded-lg shadow">
-      {% endfor %}
-    </div>
-    {% endif %}
 
     <div class="text-center text-sm text-gray-600">
       <a href="{% url 'rawina:dashboard' %}" class="text-softbrown hover:underline">

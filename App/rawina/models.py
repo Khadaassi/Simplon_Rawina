@@ -14,8 +14,8 @@ class Story(models.Model):
     prompt = models.TextField(help_text="Prompt utilisé pour générer l'histoire")
     generated_text = models.TextField(help_text="Texte généré par le modèle")
 
-    images = models.JSONField(blank=True, null=True, help_text="Liste d'URLs ou chemins d'images")
-    audio_url = models.URLField(blank=True, null=True, help_text="Lien vers le fichier audio généré")
+    image = models.ImageField(upload_to="generated_images/", blank=True, null=True)
+    audio_file = models.FileField(upload_to="generated_audios/", blank=True, null=True, help_text="Fichier audio généré")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
