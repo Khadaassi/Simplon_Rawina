@@ -1,37 +1,55 @@
 import os
-
 import requests
+import threading
 from dotenv import load_dotenv
 from xhtml2pdf import pisa
 
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView, ListView, CreateView
+from django.views.generic import TemplateView, ListView, DetailView
 from django.views.generic.edit import FormView
 
 from .forms import StoryGenerationForm, ChooseThemeForm
 from .models import Story
 
 
+# charge .env
 load_dotenv()
-
 API_URL = os.getenv("RAWINA_API_URL")
 
 
-# Create your views here.
+def _generate_and_save(story_id, payload):
+    """
+    Tâche de fond : appelle l’API et met à jour `generated_text` (+ audio_url).
+    """
+    try:
+        resp = requests.post(API_URL, json=payload, timeout=300)
+        resp.raise_for_status()
+        data = resp.json()
+        text = data.get("story", "")
+        audio = data.get("audio_path")
+    except Exception:
+        text, audio = "⚠️ Failed to generate story.", None
+
+    story = Story.objects.get(pk=story_id)
+    story.generated_text = text
+    if audio:
+        story.audio_url = audio
+    story.save()
+
+
 class DashboardView(TemplateView):
     template_name = "rawina/dashboard.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        ctx = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            context["stories"] = Story.objects.filter(user=self.request.user).order_by(
-                "-created_at"
-            )[:3]
-        return context
+            ctx["stories"] = Story.objects.filter(user=self.request.user) \
+                                        .order_by("-created_at")[:3]
+        return ctx
 
 
 class StoryListView(ListView):
@@ -40,20 +58,36 @@ class StoryListView(ListView):
     context_object_name = "stories"
 
     def get_queryset(self):
-        return Story.objects.filter(user=self.request.user)
+        return Story.objects.filter(user=self.request.user).order_by("-created_at")
 
     def get(self, request, *args, **kwargs):
-        if "pdf" in request.GET and "id" in request.GET:
-            story = Story.objects.get(id=request.GET.get("id"), user=request.user)
+        # téléchargement PDF à la volée si on passe ?pdf=1&id=...
+        if request.GET.get("pdf") and request.GET.get("id"):
+            story = get_object_or_404(Story, id=request.GET["id"], user=request.user)
             html = render_to_string("rawina/story_pdf.html", {"story": story})
             response = HttpResponse(content_type="application/pdf")
-            response["Content-Disposition"] = (
-                f'attachment; filename="{story.title}.pdf"'
-            )
+            response["Content-Disposition"] = f'attachment; filename="{story.title}.pdf"'
             pisa.CreatePDF(html, dest=response)
             return response
-
         return super().get(request, *args, **kwargs)
+
+
+class StoryDetailView(DetailView):
+    model = Story
+    template_name = "rawina/story_detail.html"
+    context_object_name = "story"
+
+    def get_queryset(self):
+        return Story.objects.filter(user=self.request.user)
+
+
+class ChooseThemeView(FormView):
+    template_name = "rawina/choose_theme.html"
+    form_class = ChooseThemeForm
+
+    def form_valid(self, form):
+        selected = form.cleaned_data["theme"]
+        return redirect(f"{reverse('rawina:create')}?theme={selected}")
 
 
 class StoryCreateView(FormView):
@@ -68,89 +102,56 @@ class StoryCreateView(FormView):
         return initial
 
     def form_valid(self, form):
-        # Récupère les données du formulaire
-        name = form.cleaned_data["name"]
-        character = form.cleaned_data["character"]
-        place = form.cleaned_data["place"]
-        theme = form.cleaned_data["theme"]
-        title = f"{name.capitalize()}'s Story"
-
-        # Prépare le payload pour l'API
+        # prépare le payload
         payload = {
             "user_id": str(self.request.user.id),
-            "theme": theme,
-            "name": name,
-            "creature": character,
-            "place": place,
-            "audio": False,
+            "theme": form.cleaned_data["theme"],
+            "name": form.cleaned_data["name"],
+            "creature": form.cleaned_data["character"],
+            "place": form.cleaned_data["place"],
+            "audio": True,
         }
 
-        # Appel à l'API FastAPI
-        try:
-            resp = requests.post(API_URL, json=payload, timeout=30)
-            resp.raise_for_status()
-            data = resp.json()
-            generated_text = data.get("story", "")
-            audio_path = data.get("audio_path")
-        except Exception as e:
-            form.add_error(None, "Could not generate story. Please try again later.")
-            return self.form_invalid(form)
-
-
-        # Création de l'objet Story en base
+        # crée un placeholder vide
         story = Story.objects.create(
             user=self.request.user,
-            title=title,
-            theme=theme,
-            prompt="",  # si tu veux stocker le prompt d'appel, tu peux le mettre ici
-            generated_text=generated_text,
-            audio_url=audio_path,
+            title=f"{form.cleaned_data['name'].capitalize()}'s Story",
+            theme=payload["theme"],
+            prompt="",   # ou stocke ici ton prompt
+            generated_text="",
         )
 
-        # Affiche la page de loading avant redirection
-        return render(
-            self.request,
-            "rawina/loading_story.html",
-            {
-                "redirect_url": reverse("rawina:story", kwargs={"pk": story.pk}),
-                "delay": 3000,
-            },
-        )
+        # lance la génération en background
+        threading.Thread(
+            target=_generate_and_save,
+            args=(story.pk, payload),
+            daemon=True
+        ).start()
+
+        # renvoie la page de loading (JS de polling utilisera StoryStatusView)
+        return render(self.request, "rawina/loading_story.html", {
+            "story_id": story.pk,
+        })
 
 
-class ChooseThemeView(FormView):
-    template_name = "rawina/choose_theme.html"
-    form_class = ChooseThemeForm
-
-    def form_valid(self, form):
-        selected_theme = form.cleaned_data["theme"]
-        return redirect(f"{reverse_lazy('rawina:create')}?theme={selected_theme}")
-
-
-class StoryDetailView(TemplateView):
-    template_name = "rawina/story_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        story_id = self.kwargs.get("pk")
-        context["story"] = Story.objects.get(id=story_id)
-        return context
+class StoryStatusView(View):
+    """
+    End-point JSON pour le polling de loading_story.html :
+    renvoie { ready: bool, url: "<detail_url>" }
+    """
+    def get(self, request, pk):
+        story = get_object_or_404(Story, pk=pk, user=request.user)
+        return JsonResponse({
+            "ready": bool(story.generated_text),
+            "url": reverse("rawina:story", kwargs={"pk": story.pk})
+        })
 
 
-class StoryDeleteView(TemplateView):
-    template_name = "rawina/story_delete.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        story_id = self.kwargs.get("pk")
-        context["story"] = Story.objects.get(id=story_id)
-        return context
-
-    def post(self, request, *args, **kwargs):
-        story_id = self.kwargs.get("pk")
-        story = Story.objects.get(id=story_id)
-        if story.user == request.user:
-            story.delete()
-            return redirect(reverse("rawina:story_list"))
-        return redirect(reverse("rawina:dashboard"))
-
+class StoryDeleteView(View):
+    """
+    Supprime la story et redirige selon le résultat.
+    """
+    def post(self, request, pk):
+        story = get_object_or_404(Story, pk=pk, user=request.user)
+        story.delete()
+        return redirect(reverse("rawina:story_list"))
