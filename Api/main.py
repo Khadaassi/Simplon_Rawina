@@ -6,22 +6,29 @@ from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import sys
 
 # === Chargement des variables d'environnement (.env) ===
 load_dotenv()
 
+# === Fix chemin pour imports Model/* ===
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 # === Gestion de l'audio optionnelle ===
 try:
-    import sys
-    import os
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
     from Model.audio_generator import generate_audio
-
     print("🔊 Module audio chargé avec succès.")
 except ImportError:
     generate_audio = None
     print("⚠️ Module audio non disponible.")
+
+# === Gestion de l'image optionnelle ===
+try:
+    from Model.image_generator import generate_images_for_story
+    print("🖼️ Module image chargé avec succès.")
+except ImportError:
+    generate_images_for_story = None
+    print("⚠️ Module image non disponible.")
 
 # === Initialisation FastAPI ===
 app = FastAPI()
@@ -111,6 +118,7 @@ def generate(request: StoryRequest):
     print(f"📥 Requête reçue pour l'utilisateur : {request.user_id}")
     story = generate_story(prompt)
     audio_path = None
+    image_paths = []
 
     if request.audio:
         print("🎧 Audio demandé")
@@ -125,8 +133,21 @@ def generate(request: StoryRequest):
         else:
             print("⚠️ Module audio non chargé, audio ignoré.")
 
+    if generate_images_for_story:
+        try:
+            base_character = f"{request.name}, a {request.creature} who lives in a {request.place}"
+            image_paths = generate_images_for_story(
+                story_text=story,
+                user_id=request.user_id,
+                base_character=base_character,
+            )
+            print(f"✅ Image générée : {image_paths[0] if image_paths else 'aucune'}")
+        except Exception as e:
+            print(f"❌ Erreur lors de la génération d’image : {e}")
+
     return {
         "user_id": request.user_id,
         "story": story,
-        "audio_path": audio_path
+        "audio_path": audio_path,
+        "image_paths": image_paths
     }
