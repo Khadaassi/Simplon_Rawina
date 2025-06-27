@@ -1,9 +1,12 @@
+from email.mime import audio
 import os
 import requests
 import threading
+from pathlib import Path
 from dotenv import load_dotenv
 from xhtml2pdf import pisa
 
+from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -15,29 +18,33 @@ from django.views.generic.edit import FormView
 from .forms import StoryGenerationForm, ChooseThemeForm
 from .models import Story
 
-
-# charge .env
 load_dotenv()
 API_URL = os.getenv("RAWINA_API_URL")
 
 
 def _generate_and_save(story_id, payload):
     """
-    Tâche de fond : appelle l’API et met à jour `generated_text` (+ audio_url).
+    Background task: call the API and update story fields (text, image, audio).
     """
     try:
         resp = requests.post(API_URL, json=payload, timeout=300)
         resp.raise_for_status()
         data = resp.json()
+        print("🧾 API response:", data)
         text = data.get("story", "")
         audio = data.get("audio_path")
+        images = data.get("image_paths", [])
     except Exception:
-        text, audio = "⚠️ Failed to generate story.", None
+        text, audio, images = "⚠️ Failed to generate story.", None, []
 
     story = Story.objects.get(pk=story_id)
     story.generated_text = text
+
     if audio:
-        story.audio_url = audio
+        story.audio_file.name = audio
+    if images:
+        story.image.name = images[0]
+
     story.save()
 
 
@@ -47,8 +54,7 @@ class DashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            ctx["stories"] = Story.objects.filter(user=self.request.user) \
-                                        .order_by("-created_at")[:3]
+            ctx["stories"] = Story.objects.filter(user=self.request.user).order_by("-created_at")[:3]
         return ctx
 
 
@@ -58,10 +64,10 @@ class StoryListView(ListView):
     context_object_name = "stories"
 
     def get_queryset(self):
+        print("MEDIA_ROOT:", settings.MEDIA_ROOT)
         return Story.objects.filter(user=self.request.user).order_by("-created_at")
 
     def get(self, request, *args, **kwargs):
-        # téléchargement PDF à la volée si on passe ?pdf=1&id=...
         if request.GET.get("pdf") and request.GET.get("id"):
             story = get_object_or_404(Story, id=request.GET["id"], user=request.user)
             html = render_to_string("rawina/story_pdf.html", {"story": story})
@@ -69,6 +75,7 @@ class StoryListView(ListView):
             response["Content-Disposition"] = f'attachment; filename="{story.title}.pdf"'
             pisa.CreatePDF(html, dest=response)
             return response
+        
         return super().get(request, *args, **kwargs)
 
 
@@ -102,7 +109,6 @@ class StoryCreateView(FormView):
         return initial
 
     def form_valid(self, form):
-        # prépare le payload
         payload = {
             "user_id": str(self.request.user.id),
             "theme": form.cleaned_data["theme"],
@@ -112,23 +118,20 @@ class StoryCreateView(FormView):
             "audio": True,
         }
 
-        # crée un placeholder vide
         story = Story.objects.create(
             user=self.request.user,
             title=f"{form.cleaned_data['name'].capitalize()}'s Story",
             theme=payload["theme"],
-            prompt="",   # ou stocke ici ton prompt
+            prompt="",
             generated_text="",
         )
 
-        # lance la génération en background
         threading.Thread(
             target=_generate_and_save,
             args=(story.pk, payload),
             daemon=True
         ).start()
 
-        # renvoie la page de loading (JS de polling utilisera StoryStatusView)
         return render(self.request, "rawina/loading_story.html", {
             "story_id": story.pk,
         })
@@ -136,8 +139,7 @@ class StoryCreateView(FormView):
 
 class StoryStatusView(View):
     """
-    End-point JSON pour le polling de loading_story.html :
-    renvoie { ready: bool, url: "<detail_url>" }
+    Returns JSON status of story generation for polling.
     """
     def get(self, request, pk):
         story = get_object_or_404(Story, pk=pk, user=request.user)
@@ -149,7 +151,7 @@ class StoryStatusView(View):
 
 class StoryDeleteView(View):
     """
-    Supprime la story et redirige selon le résultat.
+    Deletes a story and redirects to list view.
     """
     def post(self, request, pk):
         story = get_object_or_404(Story, pk=pk, user=request.user)
