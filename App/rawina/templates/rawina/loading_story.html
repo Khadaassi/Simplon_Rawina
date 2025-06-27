@@ -4,38 +4,42 @@
 {% block title %}Generating Story...{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-sand-beige flex flex-col items-center justify-center px-6 py-16">
-    <img src="{% static 'images/owl_loader.gif' %}" alt="Loading Owl" class="w-32 mb-6">
-    
-    <h2 class="text-2xl font-bold text-sage-green mb-2">Rawina is creating your story...</h2>
-    <p class="text-gray-700 text-center max-w-xl">
-      Gathering words, mixing magic, and imagining the perfect tale just for you. This may take a few seconds.
-    </p>
+<div class="min-h-screen bg-gradient-to-b from-sand-beige to-lavender flex flex-col items-center justify-center px-6 py-16 text-center relative">
 
-    <div class="mt-8">
-        <svg class="animate-spin h-8 w-8 text-light-sienna" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-        </svg>
-    </div>
+  <img src="{% static 'images/owl_loader.gif' %}" alt="Loading Owl" class="w-32 h-32 mb-6 animate-bounce" />
+
+  <h2 class="text-3xl font-bold text-deepviolet mb-2 tracking-wide">
+    Rawi is creating your story...
+  </h2>
+
+  <p class="text-gray-800 text-lg max-w-xl mx-auto mb-6">
+    He's gathering sparkles, ideas, and imagination to create something magical for you.
+    Please wait a few seconds while the tale comes to life.
+  </p>
+
+  <div class="mt-4">
+    <svg class="animate-spin h-10 w-10 text-golden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+    </svg>
+  </div>
+
+  <p class="mt-6 text-sm text-gray-500">Your adventure is almost ready...</p>
+
 </div>
 
 <script>
 (function checkReady() {
-    fetch("{% url 'rawina:story_status' pk=story_id %}")
-
+  fetch("{% url 'rawina:story_status' pk=story_id %}")
     .then(response => response.json())
     .then(data => {
       if (data.ready) {
-        // Dès que ready == true, on redirige vers la page détail
         window.location.href = data.url;
       } else {
-        // Sinon on retente dans 2 secondes
         setTimeout(checkReady, 2000);
       }
     })
     .catch(() => {
-      // En cas d'erreur réseau, on retente plus tard
       setTimeout(checkReady, 5000);
     });
 })();
