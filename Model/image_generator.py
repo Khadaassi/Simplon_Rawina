@@ -45,7 +45,7 @@ def generate_cover_image(story_text, base_character, user_id="story"):
     """
     Generate a representative cover image for the entire story.
     """
-    summary_prompt = f"Children's book cover illustration, soft pastel style, consistent characters, 3 to 6 years old style, {base_character} in the story: {story_text[:400]}"
+    summary_prompt = f"Children's book cover illustration with no text, soft pastel style, consistent characters, 3 to 6 years old style, {base_character} in the story: {story_text[:400]}"
     return generate_image(summary_prompt, filename_prefix=f"{user_id}_cover")
 
 def generate_images_for_story(story_text, user_id="story", base_character="a little animal"):

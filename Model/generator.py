@@ -99,7 +99,7 @@ def build_prompt(name="Lina", creature="little bunny", place="green meadow", the
 # === Nettoyage du texte généré ===
 def clean_story(text, prompt):
     story = text.replace(prompt, "").strip()
-    stopwords = ["Once upon a time", "Theme:", "Example:", "Now write another", "Table of Contents", "Book", "Chapter"]
+    stopwords = ["Theme:", "Example:", "Now write another", "Table of Contents", "Book", "Chapter"]
     for stop in stopwords:
         if stop in story:
             story = story.split(stop)[0].strip()
