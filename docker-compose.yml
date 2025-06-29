@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: App/Dockerfile
+    volumes:
+      - ./App:/app
+      - ./media:/app/media
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
+    volumes:
+      - ./Model:/api/Model
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
